@@ -2,7 +2,7 @@
 
 enum planck_layers {
     _QWERTY,
-    _QWERTY_NUM,
+    _QWERTY_ARROWS,
     _MACROPAD,
     _MEDIA,
     _LOWER,
@@ -19,9 +19,9 @@ enum planck_keycodes {
     QWERTY_NUM,
     MACROPAD,
     ZZZ, ZTZ, ZGZ, ZEROS,
-    LANG, SPOTLIGHT, SLEEP, EMOJI,
+    LANG, SPOTLIGHT, LOCK, EMOJI,
     SCRS, SCRS_PT, SCRS_SLT,
-    COPY, PASTE, CUT, SLCT_A
+    COPY, PASTE, CUT, SLCT_A, PASTE_MATCH
 };
 
 #define MEDIA MO(_MEDIA)
@@ -41,7 +41,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [1] = {
     {
-    LANG, SPOTLIGHT, SLEEP, EMOJI
+    LANG, SPOTLIGHT, LOCK, EMOJI
     }
 },
     
@@ -53,7 +53,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     
 [3] = {
     {
-    COPY, PASTE, CUT, SLCT_A
+    COPY, PASTE, CUT, SLCT_A, PASTE_MATCH
     }
 },
 
@@ -64,7 +64,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_LCTL, KC_ESC,  KC_LOPT, FNC,     LOWER,   KC_SPC,  MEDIA,   RAISE,   KC_RCMD, KC_ROPT, RNUM,    KC_RCTL
 ),
 
-[_QWERTY_NUM] = LAYOUT_planck_grid(
+[_QWERTY_ARROWS] = LAYOUT_planck_grid(
     KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_BSPC,
     KC_LCMD, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_ENT,
     KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_UP,   KC_RSFT,
@@ -72,16 +72,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [_MACROPAD] = LAYOUT_planck_grid(
-    KC_CIRC, KC_P7,   KC_P8,   KC_P9,    KC_ASTR, KC_BSPC,  _______, _______, _______, _______, _______, _______,
-    KC_MINS, KC_P4,   KC_P5,   KC_P6,    KC_PLUS, KC_ENT,   KC_LCBR, KC_RCBR, KC_MRWD, KC_MFFD, KC_MPLY, _______,
-    KC_P0,   KC_P1,   KC_P2,   KC_P3,    KC_SLSH, SCRS,     KC_LPRN, KC_RPRN, KC_VOLD, KC_VOLU, KC_MUTE, KC_RSFT,
-    KC_SPC,  ZEROS,   KC_COMM, KC_DOT,  LOWER,   SCRS_SLT, SCRS_PT, RAISE,   COPY,    CUT,     PASTE,   SLCT_A
+    SLCT_A, LOCK,        KC_MUTE,  KC_BSPC,  _______, _______, KC_CIRC, KC_P7, KC_P8,   KC_P9,   KC_PLUS, _______,
+    CUT,    PASTE_MATCH, KC_UP,    KC_SPC,   KC_ENT,  _______, KC_MINS, KC_P4, KC_P5,   KC_P6,   KC_EQL,  _______,
+    COPY,   KC_LEFT,     KC_DOWN,  KC_RIGHT, KC_RSFT, KC_MPLY, KC_P0,   KC_P1, KC_P2,   KC_P3,   _______, KC_ASTR,
+    PASTE,  SCRS,        SCRS_SLT, SCRS_PT,  LOWER,   KC_MRWD, KC_MFFD, RAISE, _______, _______, _______, _______
 ),
     
 [_LOWER] = LAYOUT_planck_grid(
     KC_ESC,  KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC, KC_CIRC, KC_7,    KC_8,    KC_9,    KC_PLUS, KC_ASTR,
     _______, KC_LBRC, KC_RBRC, KC_LPRN, KC_RPRN, KC_UNDS, KC_MINS, KC_4,    KC_5,    KC_6,    KC_EQL,  _______,
-    _______, KC_LABK, KC_RABK, KC_LCBR, KC_RCBR, KC_EXLM, KC_0,    KC_1,    KC_2,    KC_3,    KC_EXLM, _______,
+    _______, KC_LABK, KC_RABK, KC_LCBR, KC_RCBR, KC_EXLM, KC_0,    KC_1,    KC_2,    KC_3,    _______, _______,
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
 ),
 
@@ -153,7 +153,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case QWERTY_NUM:
             if (record->event.pressed) {
                 print("mode just switched to qwerty and this is also a huge string\n");
-                set_single_persistent_default_layer(_QWERTY_NUM);
+                set_single_persistent_default_layer(_QWERTY_ARROWS);
             }
             
             return false;
@@ -210,7 +210,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             
             break;
-        case SLEEP:
+        case LOCK:
             if (record->event.pressed) {
                 SEND_STRING(SS_DOWN(X_LCTL));
                 SEND_STRING(SS_DOWN(X_LCMD));
@@ -274,6 +274,22 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             
             break;
+        
+        case PASTE_MATCH:
+            if (record->event.pressed) {
+                SEND_STRING(SS_DOWN(X_LALT));
+                SEND_STRING(SS_DOWN(X_LSFT));
+                SEND_STRING(SS_DOWN(X_LCMD));
+                SEND_STRING(SS_DOWN(X_V));
+            } else {
+                SEND_STRING(SS_UP(X_V));
+                SEND_STRING(SS_UP(X_LCMD));
+                SEND_STRING(SS_UP(X_LSFT));
+                SEND_STRING(SS_UP(X_LALT));
+            }
+
+            break;
+
         case SCRS:
             if (record->event.pressed) {
                 SEND_STRING(SS_DOWN(X_LSFT));
